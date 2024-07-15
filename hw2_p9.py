@@ -4,6 +4,7 @@
 # (i.e. the arguments and return types each function takes). 
 # We will pass your grade through an autograder which expects a specific format.
 # =====================================
+import random
 
 # Do not include any other files or an external package, unless it is one of
 # [numpy, pandas, scipy, matplotlib, random]
@@ -171,9 +172,26 @@ def q_incompletecascade_graph_fig4_1_right() -> float:
     return threshold
 
 
+def q9b():
+    fb_graph = create_fb_graph()
+    num_adopters = 10
+    threshold = 0.1
+    iterations = 100
+
+    sum_infected = 0
+
+    for _ in range(iterations):
+        adopters = random.sample(range(FB_GRAPH_SIZE), num_adopters)
+        infected = contagion_brd(fb_graph, adopters, threshold)
+        sum_infected += len(infected)
+
+    average_infected = sum_infected / iterations
+    print(f"Q9b: Average infected = {average_infected}")
+
+
 def main():
     # === Problem 9(b) === #
-    # TODO: Put analysis code here
+    q9b()
     # === Problem 9(c) === #
     # TODO: Put analysis code here
     # === OPTIONAL: Bonus Question 2 === #
