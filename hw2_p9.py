@@ -28,7 +28,7 @@ class UndirectedGraph:
         if nodeA >= self._nodes_num or nodeB >= self._nodes_num:  # check if nodes exist in graph
             raise ValueError(
                 f'At least one of the nodes is out of range. Received: ({nodeA}, {nodeB}). '
-                f'Expected values are from 0 to {self._nodes_num}')
+                f'Expected values are from 0 to {self._nodes_num - 1}')
         if nodeA == nodeB:
             raise ValueError(f'Received the same node twice: {nodeA}')
         # add an edge
@@ -77,35 +77,27 @@ class BRD:
         self.play_y = set(self.switchers)
 
     def run(self):
-        switched = self.do_switchers()
+        switched = self.do_switches()
         while switched:
-            switched = self.do_switchers()
+            switched = self.do_switches()
 
-    def _switch_to_x(self, player: int):
+    def _switch(self, player: int):
         self.play_x.add(player)
         self.play_y.remove(player)
 
-    def _switch_to_y(self, player: int):
-        self.play_y.add(player)
-        self.play_x.remove(player)
+    def do_switches(self) -> bool:
+        to_switch = [player for player in self.play_y if self.is_above_threshold(player)]
+        for player in to_switch:
+            self._switch(player)
+        return len(to_switch) > 0  # did switches happen?
 
-    def do_switchers(self) -> bool:
-        switched = False
-        for player in self.switchers:
-            if player in self.play_x and self.is_above_threshold(player, self.play_y):
-                self._switch_to_x(player)
-                switched = True
-            elif player in self.play_y and self.is_above_threshold(player, self.play_x):
-                self._switch_to_y(player)
-                switched = True
-        return switched
-
-    def is_above_threshold(self, candidate: int, disagreeing_nodes: set[int]):
-        disagreeing_friends: int = 0
-        for friend in self.graph.edges_from(candidate):
-            if friend in disagreeing_nodes:
-                disagreeing_friends += 1
-        return disagreeing_friends / self.graph.number_of_nodes() > self.threshold
+    def is_above_threshold(self, player: int):
+        play_x_friends: int = 0
+        total_friends = len(self.graph.edges_from(player))
+        for friend in self.graph.edges_from(player):
+            if friend in self.play_x:
+                play_x_friends += 1
+        return play_x_friends / total_friends > self.threshold
 
 
 def contagion_brd(G: UndirectedGraph, S: list[int], t: float):
@@ -120,28 +112,63 @@ def contagion_brd(G: UndirectedGraph, S: list[int], t: float):
     return brd.play_x
 
 
-def q_completecascade_graph_fig4_1_left():
+def _construct_graph_fig4_1_left() -> UndirectedGraph:
+    graph = UndirectedGraph(4)
+    graph.add_edge(0, 1)
+    graph.add_edge(1, 2)
+    graph.add_edge(2, 3)
+    return graph
+
+
+def _construct_graph_fig4_1_right() -> UndirectedGraph:
+    graph = UndirectedGraph(7)
+    graph.add_edge(0, 1)
+    graph.add_edge(1, 2)
+    graph.add_edge(2, 3)
+    graph.add_edge(1, 4)
+    graph.add_edge(2, 5)
+    graph.add_edge(3, 6)
+    return graph
+
+
+def q_completecascade_graph_fig4_1_left() -> float:
     """Return a float t s.t. the left graph in Figure 4.1 cascades completely."""
-    # TODO: Implement this method 
-    pass
+    graph = _construct_graph_fig4_1_left()
+    adopters = [0, 1]
+    threshold = 1 / 4
+    result = contagion_brd(graph, adopters, threshold)
+    assert len(result) == graph.number_of_nodes()
+    return threshold
 
 
-def q_incompletecascade_graph_fig4_1_left():
+def q_incompletecascade_graph_fig4_1_left() -> float:
     """Return a float t s.t. the left graph in Figure 4.1 does not cascade completely."""
-    # TODO: Implement this method 
-    pass
+    graph = _construct_graph_fig4_1_left()
+    adopters = [0, 1]
+    threshold = 3 / 5
+    result = contagion_brd(graph, adopters, threshold)
+    assert len(result) < graph.number_of_nodes()
+    return threshold
 
 
-def q_completecascade_graph_fig4_1_right():
+def q_completecascade_graph_fig4_1_right() -> float:
     """Return a float t s.t. the right graph in Figure 4.1 cascades completely."""
-    # TODO: Implement this method 
-    pass
+    graph = _construct_graph_fig4_1_right()
+    adopters = [0, 1, 2]
+    threshold = 1 / 4
+    result = contagion_brd(graph, adopters, threshold)
+    assert len(result) == graph.number_of_nodes()
+    return threshold
 
 
-def q_incompletecascade_graph_fig4_1_right():
+def q_incompletecascade_graph_fig4_1_right() -> float:
     """Return a float t s.t. the right graph in Figure 4.1 does not cascade completely."""
-    # TODO: Implement this method 
-    pass
+    graph = _construct_graph_fig4_1_right()
+    adopters = [0, 1, 2]
+    threshold = 3 / 5
+    result = contagion_brd(graph, adopters, threshold)
+    assert len(result) < graph.number_of_nodes()
+    return threshold
 
 
 def main():
