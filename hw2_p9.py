@@ -5,7 +5,6 @@
 # We will pass your grade through an autograder which expects a specific format.
 # =====================================
 
-
 # Do not include any other files or an external package, unless it is one of
 # [numpy, pandas, scipy, matplotlib, random]
 # please contact us before sumission if you want another package approved.
@@ -50,6 +49,9 @@ class UndirectedGraph:
         """ This method should return the number of nodes in the graph"""
         return self._nodes_num
 
+    def get_nodes(self):
+        return range(self._nodes_num)
+
 
 def create_fb_graph(filename="facebook_combined.txt"):
     """ This method should return an undirected version of the
@@ -64,15 +66,58 @@ def create_fb_graph(filename="facebook_combined.txt"):
 
 # === Problem 9(a) ===
 
-def contagion_brd(G, S, t):
+
+class BRD:
+    def __init__(self, graph: UndirectedGraph, adopters: list[int], threshold: float):
+        self.graph: UndirectedGraph = graph
+        self.adopters: list[int] = adopters
+        self.switchers: list[int] = [node for node in self.graph.get_nodes() if node not in self.adopters]
+        self.threshold: float = threshold
+        self.play_x = set()
+        self.play_y = set()
+
+    def run(self):
+        switched = self.do_switchers()
+        while switched:
+            switched = self.do_switchers()
+
+    def _switch_to_x(self, player: int):
+        self.play_x.add(player)
+        self.play_y.remove(player)
+
+    def _switch_to_y(self, player: int):
+        self.play_y.add(player)
+        self.play_x.remove(player)
+
+    def do_switchers(self) -> bool:
+        switched = False
+        for player in self.switchers:
+            if player in self.play_x and self.is_above_threshold(player, self.play_y):
+                self._switch_to_x(player)
+                switched = True
+            elif player in self.play_y and self.is_above_threshold(player, self.play_x):
+                self._switch_to_y(player)
+                switched = True
+        return switched
+
+    def is_above_threshold(self, candidate: int, disagreeing_nodes: set[int]):
+        disagreeing_friends: int = 0
+        for friend in self.graph.edges_from(candidate):
+            if friend in disagreeing_nodes:
+                disagreeing_friends += 1
+        return disagreeing_friends / self.graph.number_of_nodes() > self.threshold
+
+
+def contagion_brd(G: UndirectedGraph, S: list[int], t: float):
     """Given an UndirectedGraph G, a list of adopters S (a list of integers in [0, G.number_of_nodes - 1]),
        and a float threshold t, perform BRD as follows:
        - Permanently infect the nodes in S with X
        - Infect the rest of the nodes with Y
        - Run BRD on the set of nodes not in S
        Return a list of all nodes infected with X after BRD converges."""
-    # TODO: Implement this method
-    pass
+    brd = BRD(graph=G, adopters=S, threshold=t)
+    brd.run()
+    return brd.play_x
 
 
 def q_completecascade_graph_fig4_1_left():
