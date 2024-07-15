@@ -73,8 +73,8 @@ class BRD:
         self.adopters: list[int] = adopters
         self.switchers: list[int] = [node for node in self.graph.get_nodes() if node not in self.adopters]
         self.threshold: float = threshold
-        self.play_x = set()
-        self.play_y = set()
+        self.play_x = set(self.adopters)
+        self.play_y = set(self.switchers)
 
     def run(self):
         switched = self.do_switchers()
