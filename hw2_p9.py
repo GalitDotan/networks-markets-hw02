@@ -171,13 +171,7 @@ def q_incompletecascade_graph_fig4_1_right() -> float:
     assert len(result) < graph.number_of_nodes()
     return threshold
 
-
-def q9b():
-    fb_graph = create_fb_graph()
-    num_adopters = 10
-    threshold = 0.1
-    iterations = 100
-
+def run_BRD_using_params(fb_graph, num_adopters, threshold, iterations):
     sum_infected = 0
 
     for _ in range(iterations):
@@ -185,26 +179,71 @@ def q9b():
         infected = contagion_brd(fb_graph, adopters, threshold)
         sum_infected += len(infected)
 
-    average_infected = sum_infected / iterations
+    return sum_infected / iterations
+
+
+def q9b():
+    num_adopters = 10
+    threshold = 0.1
+    iterations = 100
+    fb_graph = create_fb_graph()
+
+    average_infected = run_BRD_using_params(fb_graph, num_adopters, threshold, iterations)
     print(f"Q9b: Average infected = {average_infected}")
 
+
+def q9c():
+    fb_graph = create_fb_graph()
+    num_adopters = 10
+    iterations = 10
+    # for t - try increments of 0.05 from 0 to 0.5
+    print('Q9c: \ncheck t')
+    threshold = 0
+    while threshold <= 0.5:
+        average_infected = run_BRD_using_params(fb_graph, num_adopters, threshold, iterations)
+        print(f"t={threshold}: Average infected = {average_infected}")
+        threshold += 0.05
+    # for k - try increments of 10 from 0 to 250
+    print('check k')
+    threshold = 0.1
+    num_adopters = 0
+    while num_adopters <= 250:
+        average_infected = run_BRD_using_params(fb_graph, num_adopters, threshold, iterations)
+        num_adopters += 10
+        print(f"k={num_adopters}: Average infected = {average_infected}")
+    return
 
 def main():
     # === Problem 9(b) === #
     q9b()
     # === Problem 9(c) === #
-    # TODO: Put analysis code here
+    q9c()
     # === OPTIONAL: Bonus Question 2 === #
-    # TODO: Put analysis code here
-    pass
+    fb_graph = create_fb_graph()
+    min_early_adopters(fb_graph, 0.1)
 
 
 # === OPTIONAL: Bonus Question 2 === #
-def min_early_adopters(G, q):
+def min_early_adopters(G, t):
     """Given an undirected graph G, and float threshold t, approximate the
        smallest number of early adopters that will call a complete cascade.
        Return an integer between [0, G.number_of_nodes()]"""
-    pass
+    min_k = 0
+    max_k = FB_GRAPH_SIZE
+    epsilon = 0.5
+    current_k = round((FB_GRAPH_SIZE * t) / 3)
+    print(f'current k = {current_k}')
+    iterations = 20
+    while max_k - min_k > 1:
+        average_infected = run_BRD_using_params(G, current_k, t, iterations)
+        print(f'average infected = {average_infected}')
+        if FB_GRAPH_SIZE - average_infected < epsilon:
+            max_k = current_k
+        else:
+            min_k = current_k
+        current_k = (min_k + max_k) // 2
+        print(f'current k = {current_k}, max={max_k}, min={min_k}')
+    return current_k
 
 
 if __name__ == "__main__":
