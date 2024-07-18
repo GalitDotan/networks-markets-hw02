@@ -28,7 +28,7 @@ class Color:
 # and attributes as needed. You may/should reuse code from previous HWs when applicable.
 class WeightedDirectedGraph:
     def __init__(self, number_of_nodes):
-        '''Assume that nodes are represented by indices/integers between 0 and number_of_nodes - 1.'''
+        """Assume that nodes are represented by indices/integers between 0 and number_of_nodes - 1."""
         self._nodes_num = number_of_nodes
         # graph: is a dictionary,
         # keys are the nodes, 
@@ -37,9 +37,9 @@ class WeightedDirectedGraph:
         self.edges_weights = {}
 
     def set_edge(self, origin_node, destination_node, weight=1):
-        ''' Modifies the weight for the specified directed edge, from origin to destination node,
+        """ Modifies the weight for the specified directed edge, from origin to destination node,
             with specified weight (an integer >= 0). If weight = 0, effectively removes the edge from 
-            the graph. If edge previously wasn't in the graph, adds a new edge with specified weight.'''
+            the graph. If edge previously wasn't in the graph, adds a new edge with specified weight."""
         node_key = (origin_node, destination_node)
         if node_key in self.edges_weights:
             if weight == 0:  # delete edge
@@ -53,21 +53,21 @@ class WeightedDirectedGraph:
                 self._adjacency_set[origin_node].add(destination_node)
 
     def edges_from(self, origin_node):
-        ''' This method shold return a list of all the nodes destination_node such that there is
-            a directed edge (origin_node, destination_node) in the graph (i.e. with weight > 0).'''
+        """ This method shold return a list of all the nodes destination_node such that there is
+            a directed edge (origin_node, destination_node) in the graph (i.e. with weight > 0)."""
         return list(self._adjacency_set[origin_node])
 
     def get_edge(self, origin_node, destination_node):
-        ''' This method should return the weight (an integer > 0) 
+        """ This method should return the weight (an integer > 0) 
             if there is an edge between origin_node and 
-            destination_node, and 0 otherwise.'''
+            destination_node, and 0 otherwise."""
         node_key = (origin_node, destination_node)
         if node_key in self.edges_weights:
             return self.edges_weights[node_key]
         return 0
 
     def number_of_nodes(self):
-        ''' This method should return the number of nodes in the graph'''
+        """ This method should return the number of nodes in the graph"""
         return self._nodes_num
 
 
@@ -115,7 +115,7 @@ def shortest_path(G: UndirectedGraph, i: int, j: int):
 
 
 def copy_graph(G):
-    '''copy graph G and return the copy'''
+    """copy graph G and return the copy"""
     copy = WeightedDirectedGraph(G.number_of_nodes())
     for node in range(copy.number_of_nodes()):
         edges = G.edges_from(node)
@@ -125,7 +125,7 @@ def copy_graph(G):
 
 
 def min_weight(G, path):
-    '''find the minmum edge weight in path'''
+    """find the minmum edge weight in path"""
     min_w = G.get_edge(path[0], path[1])
     for i in range(1, len(path) - 1):
         temp = G.get_edge(path[i], path[i + 1])
@@ -135,7 +135,7 @@ def min_weight(G, path):
 
 
 def create_F(G, G_copy, s):
-    '''creat F graph for max flow'''
+    """creat F graph for max flow"""
     F = copy_graph(G)
     v = 0
     for node in range(F.number_of_nodes()):
@@ -149,11 +149,11 @@ def create_F(G, G_copy, s):
 
 # === Problem 10(a) ===
 def max_flow(G, s, t):
-    '''Given a WeightedDirectedGraph G, a source node s, a destination node t,
+    """Given a WeightedDirectedGraph G, a source node s, a destination node t,
        compute the (integer) maximum flow from s to t, treating the weights of G as capacities.
        Return a tuple (v, F) where v is the integer value of the flow, and F is a maximum flow
        for G, represented by another WeightedDirectedGraph where edge weights represent
-       the final allocated flow along that edge.'''
+       the final allocated flow along that edge."""
     G_copy = copy_graph(G)
     path = shortest_path(G_copy, s, t)
     while len(path) != 0:
@@ -169,12 +169,12 @@ def max_flow(G, s, t):
 
 # === Problem 10(c) ===
 def max_matching(n, m, C):
-    '''Given n drivers, m riders, and a set of matching constraints C,
+    """Given n drivers, m riders, and a set of matching constraints C,
     output a maximum matching. Specifically, C is a n x m array, where
     C[i][j] = 1 if driver i (in 0...n-1) and rider j (in 0...m-1) are compatible.
     If driver i and rider j are incompatible, then C[i][j] = 0. 
     Return an n-element array M where M[i] = j if driver i is matched with rider j,
-    and M[i] = None if driver i is not matched.'''
+    and M[i] = None if driver i is not matched."""
     G = WeightedDirectedGraph(n + m + 2)
     M = [0] * n
     s = n + m
@@ -199,9 +199,9 @@ def max_matching(n, m, C):
 
 # === Problem 10(d) ===
 def random_driver_rider_bipartite_graph(n, p):
-    '''Returns an n x n constraints array C as defined for max_matching, representing a bipartite
+    """Returns an n x n constraints array C as defined for max_matching, representing a bipartite
        graph with 2n nodes, where each vertex in the left half is connected to any given vertex in the 
-       right half with probability p.'''
+       right half with probability p."""
     C = []
     for i in range(n):
         row = []
