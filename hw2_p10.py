@@ -6,12 +6,13 @@
 # =====================================
 
 
+import matplotlib.pyplot as plt
 # Do not include any other files or an external package, unless it is one of
-# [numpy, pandas, scipy, matplotlib, random] 
+# [numpy, pandas, scipy, matplotlib, random]
 # and UndirectGraph from hw2_p9
 # please contact us before sumission if you want another package approved.
 import numpy as np
-import matplotlib.pyplot as plt
+
 from hw2_p9 import UndirectedGraph
 
 INFINITE_DISTANCE = -1
@@ -26,46 +27,45 @@ class Color:
 # Implement the methods in this class as appropriate. Feel free to add other methods
 # and attributes as needed. You may/should reuse code from previous HWs when applicable.
 class WeightedDirectedGraph:
-    def __init__(self,number_of_nodes):
+    def __init__(self, number_of_nodes):
         '''Assume that nodes are represented by indices/integers between 0 and number_of_nodes - 1.'''
         self._nodes_num = number_of_nodes
         # graph: is a dictionary,
         # keys are the nodes, 
         # values are set of nodes with edge to key node
         self._adjacency_set = {i: set() for i in range(number_of_nodes)}
-        self.edges_weights={}
-    
+        self.edges_weights = {}
+
     def set_edge(self, origin_node, destination_node, weight=1):
         ''' Modifies the weight for the specified directed edge, from origin to destination node,
             with specified weight (an integer >= 0). If weight = 0, effectively removes the edge from 
             the graph. If edge previously wasn't in the graph, adds a new edge with specified weight.'''
-        node_key=(origin_node,destination_node)
+        node_key = (origin_node, destination_node)
         if node_key in self.edges_weights:
-            if weight==0: # delete edge
+            if weight == 0:  # delete edge
                 self.edges_weights.pop(node_key)
                 self._adjacency_set[origin_node].discard(destination_node)
             else:
-                self.edges_weights[node_key]=weight
+                self.edges_weights[node_key] = weight
         else:
-            if weight>0: #add edge
-                self.edges_weights[node_key]=weight
+            if weight > 0:  # add edge
+                self.edges_weights[node_key] = weight
                 self._adjacency_set[origin_node].add(destination_node)
-        
+
     def edges_from(self, origin_node):
         ''' This method shold return a list of all the nodes destination_node such that there is
             a directed edge (origin_node, destination_node) in the graph (i.e. with weight > 0).'''
         return list(self._adjacency_set[origin_node])
-        
-    
+
     def get_edge(self, origin_node, destination_node):
         ''' This method should return the weight (an integer > 0) 
             if there is an edge between origin_node and 
             destination_node, and 0 otherwise.'''
-        node_key=(origin_node,destination_node)
+        node_key = (origin_node, destination_node)
         if node_key in self.edges_weights:
             return self.edges_weights[node_key]
         return 0
-    
+
     def number_of_nodes(self):
         ''' This method should return the number of nodes in the graph'''
         return self._nodes_num
@@ -102,46 +102,49 @@ def shortest_path(G: UndirectedGraph, i: int, j: int):
                 parent[node2] = node1
                 queue.append(node2)
         color[node1] = Color.BLACK
-    path=[]# create the path
-    curr=j
-    if distance[curr]==-1:
+    path = []  # create the path
+    curr = j
+    if distance[curr] == -1:
         return path
     path.append(curr)
-    while curr!=i:
-        curr=parent[curr]
+    while curr != i:
+        curr = parent[curr]
         path.append(curr)
     path.reverse()
     return path
 
+
 def copy_graph(G):
     '''copy graph G and return the copy'''
-    copy=WeightedDirectedGraph(G.number_of_nodes())
+    copy = WeightedDirectedGraph(G.number_of_nodes())
     for node in range(copy.number_of_nodes()):
-        edges=G.edges_from(node)
+        edges = G.edges_from(node)
         for edge in edges:
-            copy.set_edge(node,edge,G.get_edge(node,edge))
+            copy.set_edge(node, edge, G.get_edge(node, edge))
     return copy
 
-def min_weight(G,path):
+
+def min_weight(G, path):
     '''find the minmum edge weight in path'''
-    min_w=G.get_edge(path[0],path[1])
-    for i in range(1,len(path)-1):
-        temp=G.get_edge(path[i],path[i+1])
-        if temp<min_w:
-            min_w=temp
+    min_w = G.get_edge(path[0], path[1])
+    for i in range(1, len(path) - 1):
+        temp = G.get_edge(path[i], path[i + 1])
+        if temp < min_w:
+            min_w = temp
     return min_w
 
-def create_F(G,G_copy,s):
+
+def create_F(G, G_copy, s):
     '''creat F graph for max flow'''
-    F=copy_graph(G)
-    v=0
+    F = copy_graph(G)
+    v = 0
     for node in range(F.number_of_nodes()):
-        edges=F.edges_from(node)
+        edges = F.edges_from(node)
         for edge in edges:
-            F.set_edge(node,edge,F.get_edge(node,edge)-G_copy.get_edge(node,edge))
+            F.set_edge(node, edge, F.get_edge(node, edge) - G_copy.get_edge(node, edge))
     for edge in F.edges_from(s):
-        v+=F.get_edge(s,edge)
-    return v,F
+        v += F.get_edge(s, edge)
+    return v, F
 
 
 # === Problem 10(a) ===
@@ -151,17 +154,17 @@ def max_flow(G, s, t):
        Return a tuple (v, F) where v is the integer value of the flow, and F is a maximum flow
        for G, represented by another WeightedDirectedGraph where edge weights represent
        the final allocated flow along that edge.'''
-    G_copy=copy_graph(G)
-    path=shortest_path(G_copy,s,t)
-    while len(path)!=0:
-        temp_flow=min_weight(G_copy,path)
-        for i in range(len(path)-1):
-            new_weight_f=G_copy.get_edge(path[i],path[i+1])-temp_flow
-            new_weight_b=G_copy.get_edge(path[i+1],path[i])+temp_flow
-            G_copy.set_edge(path[i],path[i+1],new_weight_f)
-            G_copy.set_edge(path[i+1],path[i],new_weight_b)
-        path=shortest_path(G_copy,s,t)
-    return (create_F(G,G_copy,s))
+    G_copy = copy_graph(G)
+    path = shortest_path(G_copy, s, t)
+    while len(path) != 0:
+        temp_flow = min_weight(G_copy, path)
+        for i in range(len(path) - 1):
+            new_weight_f = G_copy.get_edge(path[i], path[i + 1]) - temp_flow
+            new_weight_b = G_copy.get_edge(path[i + 1], path[i]) + temp_flow
+            G_copy.set_edge(path[i], path[i + 1], new_weight_f)
+            G_copy.set_edge(path[i + 1], path[i], new_weight_b)
+        path = shortest_path(G_copy, s, t)
+    return (create_F(G, G_copy, s))
 
 
 # === Problem 10(c) ===
@@ -172,59 +175,62 @@ def max_matching(n, m, C):
     If driver i and rider j are incompatible, then C[i][j] = 0. 
     Return an n-element array M where M[i] = j if driver i is matched with rider j,
     and M[i] = None if driver i is not matched.'''
-    G=WeightedDirectedGraph(n+m+2)
-    M=[0]*n
-    s=n+m
-    t=n+m+1
+    G = WeightedDirectedGraph(n + m + 2)
+    M = [0] * n
+    s = n + m
+    t = n + m + 1
     for i in range(n):
         for j in range(m):
-            G.set_edge(i,n+j,C[i][j])
+            G.set_edge(i, n + j, C[i][j])
     for i in range(n):
-        G.set_edge(s,i,1)
+        G.set_edge(s, i, 1)
     for j in range(m):
-        G.set_edge(n+j,t,1)
-    v,F=max_flow(G, s, t)
+        G.set_edge(n + j, t, 1)
+    v, F = max_flow(G, s, t)
     for i in range(n):
-        j=F.edges_from(i)
-        if len(j)==0:
-            j=None
+        j = F.edges_from(i)
+        if len(j) == 0:
+            j = None
         else:
-            j=j[0]-n
-        M[i] = j 
+            j = j[0] - n
+        M[i] = j
     return M
+
 
 # === Problem 10(d) ===
 def random_driver_rider_bipartite_graph(n, p):
     '''Returns an n x n constraints array C as defined for max_matching, representing a bipartite
        graph with 2n nodes, where each vertex in the left half is connected to any given vertex in the 
        right half with probability p.'''
-    C=[]
+    C = []
     for i in range(n):
-        row=[]
+        row = []
         for j in range(n):
-            val=1 if np.random.rand()<p else 0
+            val = 1 if np.random.rand() < p else 0
             row.append(val)
         C.append(row)
     return C
 
 
 def main():
-    x=[]
-    y=[]
-    n=100
-    for p in range(1,100):
-        x.append(p/100)
-        check=0
-        for i in range(10): 
-            C=random_driver_rider_bipartite_graph(n, p/100)
-            M=max_matching(n, n, C)
+    x = []
+    y = []
+    n = 100
+    for p in range(1, 100):
+        x.append(p / 100)
+        check = 0
+        for i in range(10):
+            C = random_driver_rider_bipartite_graph(n, p / 100)
+            M = max_matching(n, n, C)
             if None in M:
                 continue
-            check+=1
-        y.append(check/10)
+            check += 1
+        y.append(check / 10)
     plt.plot(x, y)
     plt.xlabel('p')
     plt.ylabel('probaility of full match')
     plt.show()
+
+
 if __name__ == "__main__":
     main()
