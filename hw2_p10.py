@@ -51,7 +51,7 @@ class WeightedDirectedGraph:
                 self._adjacency_set[origin_node].add(destination_node)
 
     def edges_from(self, origin_node):
-        """ This method shold return a list of all the nodes destination_node such that there is
+        """ This method should return a list of all the nodes destination_node such that there is
             a directed edge (origin_node, destination_node) in the graph (i.e. with weight > 0)."""
         return list(self._adjacency_set[origin_node])
 
@@ -69,12 +69,26 @@ class WeightedDirectedGraph:
         return self._nodes_num
 
 
-def shortest_path(G: WeightedDirectedGraph, i: int, j: int):
-    """ Given an UndirectedGraph G and nodes i,j, output the shortest path between nodes i and j in G."""
-    # init
-    if i == j:
-        return 0
+def path_exists(target: int, distance: dict[int, int]) -> bool:
+    return distance[target] != INFINITE_DISTANCE
 
+
+def parse_parents_to_path(source: int, target: int, parent: dict[int, int]):
+    """
+    Parse the shortest path from source to target the parent dictionary
+    Assuming the path exists.
+    """
+    curr = target
+    path = [curr]
+    while curr != source:
+        curr = parent[curr]
+        path.append(curr)
+    path.reverse()
+    return path
+
+
+def shortest_path(G: WeightedDirectedGraph, i: int, j: int) -> list[int] | None:
+    """ Given an UndirectedGraph G and nodes i,j, output the shortest path between nodes i and j in G."""
     n = G.number_of_nodes()
     color: dict[int, str] = {}  # used to track which nodes were already visited
     distance: dict[int, int] = {}  # minimal distance from i to each node
@@ -100,26 +114,21 @@ def shortest_path(G: WeightedDirectedGraph, i: int, j: int):
                 parent[node2] = node1
                 queue.append(node2)
         color[node1] = Color.BLACK
-    path = []  # create the path
-    curr = j
-    if distance[curr] == -1:
-        return path
-    path.append(curr)
-    while curr != i:
-        curr = parent[curr]
-        path.append(curr)
-    path.reverse()
-    return path
+
+    if not path_exists(target=j, distance=distance):
+        return
+    return parse_parents_to_path(source=i, target=j, parent=parent)
 
 
 def copy_graph(G):
     """copy graph G and return the copy"""
-    copy = WeightedDirectedGraph(G.number_of_nodes())
-    for node in range(copy.number_of_nodes()):
+    n = G.number_of_nodes()
+    copied_g = WeightedDirectedGraph(n)
+    for node in range(n):
         edges = G.edges_from(node)
         for edge in edges:
-            copy.set_edge(node, edge, G.get_edge(node, edge))
-    return copy
+            copied_g.set_edge(node, edge, G.get_edge(node, edge))
+    return copied_g
 
 
 def min_weight(G, path):
@@ -146,6 +155,7 @@ def create_F(G, G_copy, s):
 
 
 # === Problem 10(a) ===
+
 def max_flow(G, s, t) -> tuple[int, WeightedDirectedGraph]:
     """Given a WeightedDirectedGraph G, a source node s, a destination node t,
        compute the (integer) maximum flow from s to t, treating the weights of G as capacities.
@@ -154,7 +164,7 @@ def max_flow(G, s, t) -> tuple[int, WeightedDirectedGraph]:
        the final allocated flow along that edge."""
     graph_copy = copy_graph(G)
     path = shortest_path(graph_copy, s, t)
-    while len(path) != 0:
+    while path:
         temp_flow = min_weight(graph_copy, path)
         for i in range(len(path) - 1):
             new_weight_f = graph_copy.get_edge(path[i], path[i + 1]) - temp_flow
@@ -166,48 +176,48 @@ def max_flow(G, s, t) -> tuple[int, WeightedDirectedGraph]:
 
 
 # === Problem 10(c) ===
-def max_matching(n, m, C):
+def max_matching(n: int, m: int, C: list[list[int]]) -> list[int]:
     """Given n drivers, m riders, and a set of matching constraints C,
     output a maximum matching. Specifically, C is a n x m array, where
     C[i][j] = 1 if driver i (in 0...n-1) and rider j (in 0...m-1) are compatible.
     If driver i and rider j are incompatible, then C[i][j] = 0. 
     Return an n-element array M where M[i] = j if driver i is matched with rider j,
     and M[i] = None if driver i is not matched."""
-    G = WeightedDirectedGraph(n + m + 2)
-    M = [0] * n
+    graph = WeightedDirectedGraph(n + m + 2)
+    matching = [0] * n
     s = n + m
     t = n + m + 1
     for i in range(n):
         for j in range(m):
-            G.set_edge(i, n + j, C[i][j])
+            graph.set_edge(i, n + j, C[i][j])
     for i in range(n):
-        G.set_edge(s, i, 1)
+        graph.set_edge(s, i, 1)
     for j in range(m):
-        G.set_edge(n + j, t, 1)
-    v, F = max_flow(G, s, t)
+        graph.set_edge(n + j, t, 1)
+    v, F = max_flow(graph, s, t)
     for i in range(n):
         j = F.edges_from(i)
         if len(j) == 0:
             j = None
         else:
             j = j[0] - n
-        M[i] = j
-    return M
+        matching[i] = j
+    return matching
 
 
 # === Problem 10(d) ===
-def random_driver_rider_bipartite_graph(n, p):
+def random_driver_rider_bipartite_graph(n: int, p: float) -> list[list[int]]:
     """Returns an n x n constraints array C as defined for max_matching, representing a bipartite
        graph with 2n nodes, where each vertex in the left half is connected to any given vertex in the 
        right half with probability p."""
-    C = []
+    graph = []
     for i in range(n):
         row = []
         for j in range(n):
             val = 1 if np.random.rand() < p else 0
             row.append(val)
-        C.append(row)
-    return C
+        graph.append(row)
+    return graph
 
 
 def main():
@@ -218,15 +228,15 @@ def main():
         x.append(p / 100)
         check = 0
         for i in range(10):
-            C = random_driver_rider_bipartite_graph(n, p / 100)
-            M = max_matching(n, n, C)
-            if None in M:
+            bipartite_graph = random_driver_rider_bipartite_graph(n, p / 100)
+            max_match = max_matching(n, n, bipartite_graph)
+            if None in max_match:  # if exists node that is unmatched
                 continue
             check += 1
         y.append(check / 10)
     plt.plot(x, y)
     plt.xlabel('p')
-    plt.ylabel('probaility of full match')
+    plt.ylabel('probability of full match')
     plt.show()
 
 
