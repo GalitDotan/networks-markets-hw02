@@ -100,7 +100,7 @@ class BRD:
         for friend in self.graph.edges_from(player):
             if friend in self.play_x:
                 play_x_friends += 1
-        return play_x_friends / total_friends > self.threshold
+        return play_x_friends / total_friends >= self.threshold
 
 
 def contagion_brd(G: UndirectedGraph, S: list[int], t: float):
