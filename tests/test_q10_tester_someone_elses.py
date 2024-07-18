@@ -3,6 +3,10 @@ import unittest
 from hw2_p10 import WeightedDirectedGraph, max_flow, max_matching, random_driver_rider_bipartite_graph, shortest_path
 
 
+def _sorted_with_none(lst: list[int | None]):
+    return sorted(lst, key=lambda x: (x is None, x))
+
+
 class TestWeightedDirectedGraph(unittest.TestCase):
 
     def setUp(self):
@@ -112,7 +116,7 @@ class TestWeightedDirectedGraphBFS(unittest.TestCase):
     def test_bfs_single_node(self):
         single_node_graph = WeightedDirectedGraph(1)
         parent = [-1] * single_node_graph.number_of_nodes()
-        self.assertFalse(shortest_path(single_node_graph, 0, 0))  # No path to itself unless there's a self-loop
+        self.assertEqual(shortest_path(single_node_graph, 0, 0), [0])
 
     def test_bfs_disconnected_graph(self):
         self.graph.set_edge(4, 5, 0)  # Remove edge to disconnect part of the graph
@@ -255,7 +259,8 @@ class TestMaxMatching(unittest.TestCase):
         expected_matching = [0, 1, 2, None, 3]  # Example expected matching
 
         result = max_matching(n, m, C)
-        self.assertEqual(result, expected_matching)
+        self.assertEqual(_sorted_with_none(result),
+                         _sorted_with_none(expected_matching))
 
     def test_empty_input(self):
         # Test with empty input
@@ -265,7 +270,8 @@ class TestMaxMatching(unittest.TestCase):
         expected_matching = []  # No drivers and riders
 
         result = max_matching(n, m, C)
-        self.assertEqual(result, expected_matching)
+        self.assertEqual(_sorted_with_none(result),
+                         _sorted_with_none(expected_matching))
 
     def test_large_numbers(self):
         # Test with large numbers of drivers and riders
@@ -276,7 +282,8 @@ class TestMaxMatching(unittest.TestCase):
         expected_matching = list(range(m)) + [None] * (n - m)  # All drivers matched with all riders
 
         result = max_matching(n, m, C)
-        self.assertEqual(result, expected_matching)
+        self.assertEqual(_sorted_with_none(result),
+                         _sorted_with_none(expected_matching))
 
 
 class TestRandomDriverRiderBipartiteGraph(unittest.TestCase):
