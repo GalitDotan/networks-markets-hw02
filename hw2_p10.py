@@ -5,7 +5,6 @@
 # We will pass your grade through an autograder which expects a specific format.
 # =====================================
 
-
 import matplotlib.pyplot as plt
 # Do not include any other files or an external package, unless it is one of
 # [numpy, pandas, scipy, matplotlib, random]
@@ -220,6 +219,29 @@ def random_driver_rider_bipartite_graph(n: int, p: float) -> list[list[int]]:
     return graph
 
 
+def perfect_match_exist(n: int, p: float) -> bool:
+    bipartite_graph = random_driver_rider_bipartite_graph(n, p)
+    max_match = max_matching(n, n, bipartite_graph)
+    return None not in max_match  # if exists node that is unmatched
+
+
+def bonus_question(p_lambda):
+    for n in range(50, 500, 50):
+        p = p_lambda(n)  # math.log(n) / n
+        cnt_success = 0
+        cnt_tries = 0
+        for _ in range(10):
+            cnt_tries += 1
+            if perfect_match_exist(n, p):
+                cnt_success += 1
+                # print(f'Success for ({n}, {p})')
+            else:
+                pass
+                # print(f'Fail for ({n}, {p})')
+        print(f'Result: {cnt_success / cnt_tries}')
+        # assert cnt_success / cnt_tries >= 0.99
+
+
 def main():
     x = []
     y = []
@@ -228,9 +250,7 @@ def main():
         x.append(p / 100)
         check = 0
         for i in range(10):
-            bipartite_graph = random_driver_rider_bipartite_graph(n, p / 100)
-            max_match = max_matching(n, n, bipartite_graph)
-            if None in max_match:  # if exists node that is unmatched
+            if not perfect_match_exist(n, p / 100):  # if exists node that is unmatched
                 continue
             check += 1
         y.append(check / 10)
@@ -242,3 +262,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # bonus_question(p_lambda=lambda n: math.log(n) / n)
+    # bonus_question(p_lambda=lambda n: (math.log(n) + 5) / n)
