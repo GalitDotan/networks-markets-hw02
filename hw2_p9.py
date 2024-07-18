@@ -95,6 +95,8 @@ class BRD:
     def is_above_threshold(self, player: int):
         play_x_friends: int = 0
         total_friends = len(self.graph.edges_from(player))
+        if total_friends == 0:
+            return False
         for friend in self.graph.edges_from(player):
             if friend in self.play_x:
                 play_x_friends += 1
@@ -110,7 +112,7 @@ def contagion_brd(G: UndirectedGraph, S: list[int], t: float):
        Return a list of all nodes infected with X after BRD converges."""
     brd = BRD(graph=G, adopters=S, threshold=t)
     brd.run()
-    return brd.play_x
+    return list(brd.play_x)
 
 
 def _construct_graph_fig4_1_left() -> UndirectedGraph:
