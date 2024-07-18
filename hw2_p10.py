@@ -41,13 +41,13 @@ class WeightedDirectedGraph:
             the graph. If edge previously wasn't in the graph, adds a new edge with specified weight.'''
         node_key=(origin_node,destination_node)
         if node_key in self.edges_weights:
-            if weight==0:
+            if weight==0: # delete edge
                 self.edges_weights.pop(node_key)
                 self._adjacency_set[origin_node].discard(destination_node)
             else:
                 self.edges_weights[node_key]=weight
         else:
-            if weight>0:
+            if weight>0: #add edge
                 self.edges_weights[node_key]=weight
                 self._adjacency_set[origin_node].add(destination_node)
         
@@ -72,8 +72,7 @@ class WeightedDirectedGraph:
 
 
 def shortest_path(G: UndirectedGraph, i: int, j: int):
-    """ Given an UndirectedGraph G and nodes i,j, output the length of the shortest path between nodes i and j in G.
-    If i and j are disconnected, output -1."""
+    """ Given an UndirectedGraph G and nodes i,j, output the shortest path between nodes i and j in G."""
     # init
     if i == j:
         return 0
@@ -103,7 +102,7 @@ def shortest_path(G: UndirectedGraph, i: int, j: int):
                 parent[node2] = node1
                 queue.append(node2)
         color[node1] = Color.BLACK
-    path=[]
+    path=[]# create the path
     curr=j
     if distance[curr]==-1:
         return path
@@ -115,6 +114,7 @@ def shortest_path(G: UndirectedGraph, i: int, j: int):
     return path
 
 def copy_graph(G):
+    '''copy graph G and return the copy'''
     copy=WeightedDirectedGraph(G.number_of_nodes())
     for node in range(copy.number_of_nodes()):
         edges=G.edges_from(node)
@@ -123,6 +123,7 @@ def copy_graph(G):
     return copy
 
 def min_weight(G,path):
+    '''find the minmum edge weight in path'''
     min_w=G.get_edge(path[0],path[1])
     for i in range(1,len(path)-1):
         temp=G.get_edge(path[i],path[i+1])
@@ -131,6 +132,7 @@ def min_weight(G,path):
     return min_w
 
 def create_F(G,G_copy,s):
+    '''creat F graph for max flow'''
     F=copy_graph(G)
     v=0
     for node in range(F.number_of_nodes()):
@@ -140,6 +142,8 @@ def create_F(G,G_copy,s):
     for edge in F.edges_from(s):
         v+=F.get_edge(s,edge)
     return v,F
+
+
 # === Problem 10(a) ===
 def max_flow(G, s, t):
     '''Given a WeightedDirectedGraph G, a source node s, a destination node t,
@@ -158,6 +162,8 @@ def max_flow(G, s, t):
             G_copy.set_edge(path[i+1],path[i],new_weight_b)
         path=shortest_path(G_copy,s,t)
     return (create_F(G,G_copy,s))
+
+
 # === Problem 10(c) ===
 def max_matching(n, m, C):
     '''Given n drivers, m riders, and a set of matching constraints C,
@@ -200,6 +206,8 @@ def random_driver_rider_bipartite_graph(n, p):
             row.append(val)
         C.append(row)
     return C
+
+
 def main():
     x=[]
     y=[]
@@ -207,7 +215,7 @@ def main():
     for p in range(1,100):
         x.append(p/100)
         check=0
-        for i in range(10):
+        for i in range(10): 
             C=random_driver_rider_bipartite_graph(n, p/100)
             M=max_matching(n, n, C)
             if None in M:
