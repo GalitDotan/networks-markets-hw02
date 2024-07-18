@@ -173,6 +173,7 @@ def q_incompletecascade_graph_fig4_1_right() -> float:
     assert len(result) < graph.number_of_nodes()
     return threshold
 
+
 def run_BRD_using_params(fb_graph, num_adopters, threshold, iterations):
     sum_infected = 0
 
@@ -214,6 +215,7 @@ def q9c():
         num_adopters += 10
         print(f"k={num_adopters}: Average infected = {average_infected}")
     return
+
 
 def main():
     # === Problem 9(b) === #
