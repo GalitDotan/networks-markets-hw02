@@ -5,7 +5,7 @@ from hw2_p9 import UndirectedGraph, contagion_brd
 
 class TestUndirectedGraph(unittest.TestCase):
     def setUp(self):
-        self.graph = UndirectedGraph(5)
+        self.graph = UndirectedGraph(5)  # nodes: 0,...,4
 
     def test_add_edge(self):
         self.graph.add_edge(0, 1)
@@ -40,7 +40,7 @@ class TestUndirectedGraph(unittest.TestCase):
     def test_get_nodes(self):
         self.graph.add_edge(0, 1)
         self.graph.add_edge(2, 3)
-        self.assertListEqual(sorted(self.graph.get_nodes()), [0, 1, 2, 3])
+        self.assertListEqual(sorted(self.graph.get_nodes()), [0, 1, 2, 3, 4])
 
 
 class TestContagionBRD(unittest.TestCase):
