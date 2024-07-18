@@ -199,14 +199,14 @@ def q9c():
     num_adopters = 10
     iterations = 10
     # for t - try increments of 0.05 from 0 to 0.5
-    print('Q9c: \ncheck t')
+    print('Q9c: \nChecking t with k=10')
     threshold = 0
     while threshold <= 0.5:
         average_infected = run_BRD_using_params(fb_graph, num_adopters, threshold, iterations)
         print(f"t={threshold}: Average infected = {average_infected}")
         threshold += 0.05
     # for k - try increments of 10 from 0 to 250
-    print('check k')
+    print('check k with t=0.1')
     threshold = 0.1
     num_adopters = 0
     while num_adopters <= 250:
@@ -226,26 +226,21 @@ def main():
 
 
 # === OPTIONAL: Bonus Question 2 === #
-def min_early_adopters(G, t):
+def min_early_adopters(G, t, iterations=20, epsilon=0.5):
     """Given an undirected graph G, and float threshold t, approximate the
        smallest number of early adopters that will call a complete cascade.
        Return an integer between [0, G.number_of_nodes()]"""
     min_k = 0
     max_k = FB_GRAPH_SIZE
-    epsilon = 0.5
     current_k = round((FB_GRAPH_SIZE * t) / 3)
-    print(f'current k = {current_k}')
-    iterations = 20
     while max_k - min_k > 1:
         average_infected = run_BRD_using_params(G, current_k, t, iterations)
-        print(f'average infected = {average_infected}')
         if FB_GRAPH_SIZE - average_infected < epsilon:
             max_k = current_k
         else:
             min_k = current_k
         current_k = (min_k + max_k) // 2
-        print(f'current k = {current_k}, max={max_k}, min={min_k}')
-    return current_k
+    return max_k
 
 
 if __name__ == "__main__":
