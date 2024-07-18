@@ -13,8 +13,6 @@ import matplotlib.pyplot as plt
 # please contact us before sumission if you want another package approved.
 import numpy as np
 
-from hw2_p9 import UndirectedGraph
-
 INFINITE_DISTANCE = -1
 
 
@@ -71,7 +69,7 @@ class WeightedDirectedGraph:
         return self._nodes_num
 
 
-def shortest_path(G: UndirectedGraph, i: int, j: int):
+def shortest_path(G: WeightedDirectedGraph, i: int, j: int):
     """ Given an UndirectedGraph G and nodes i,j, output the shortest path between nodes i and j in G."""
     # init
     if i == j:
@@ -80,7 +78,7 @@ def shortest_path(G: UndirectedGraph, i: int, j: int):
     n = G.number_of_nodes()
     color: dict[int, str] = {}  # used to track which nodes were already visited
     distance: dict[int, int] = {}  # minimal distance from i to each node
-    parent: dict[int, int] = {}  # parent of each node in the BFS
+    parent: dict[int, int | None] = {}  # parent of each node in the BFS
 
     for node in range(n):
         color[node] = Color.WHITE
@@ -125,7 +123,7 @@ def copy_graph(G):
 
 
 def min_weight(G, path):
-    """find the minmum edge weight in path"""
+    """find the minimum edge weight in path"""
     min_w = G.get_edge(path[0], path[1])
     for i in range(1, len(path) - 1):
         temp = G.get_edge(path[i], path[i + 1])
@@ -148,23 +146,23 @@ def create_F(G, G_copy, s):
 
 
 # === Problem 10(a) ===
-def max_flow(G, s, t):
+def max_flow(G, s, t) -> tuple[int, WeightedDirectedGraph]:
     """Given a WeightedDirectedGraph G, a source node s, a destination node t,
        compute the (integer) maximum flow from s to t, treating the weights of G as capacities.
        Return a tuple (v, F) where v is the integer value of the flow, and F is a maximum flow
        for G, represented by another WeightedDirectedGraph where edge weights represent
        the final allocated flow along that edge."""
-    G_copy = copy_graph(G)
-    path = shortest_path(G_copy, s, t)
+    graph_copy = copy_graph(G)
+    path = shortest_path(graph_copy, s, t)
     while len(path) != 0:
-        temp_flow = min_weight(G_copy, path)
+        temp_flow = min_weight(graph_copy, path)
         for i in range(len(path) - 1):
-            new_weight_f = G_copy.get_edge(path[i], path[i + 1]) - temp_flow
-            new_weight_b = G_copy.get_edge(path[i + 1], path[i]) + temp_flow
-            G_copy.set_edge(path[i], path[i + 1], new_weight_f)
-            G_copy.set_edge(path[i + 1], path[i], new_weight_b)
-        path = shortest_path(G_copy, s, t)
-    return (create_F(G, G_copy, s))
+            new_weight_f = graph_copy.get_edge(path[i], path[i + 1]) - temp_flow
+            new_weight_b = graph_copy.get_edge(path[i + 1], path[i]) + temp_flow
+            graph_copy.set_edge(path[i], path[i + 1], new_weight_f)
+            graph_copy.set_edge(path[i + 1], path[i], new_weight_b)
+        path = shortest_path(graph_copy, s, t)
+    return create_F(G, graph_copy, s)
 
 
 # === Problem 10(c) ===
